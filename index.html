@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Filter features within map view</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+<body>
+<style>
+    #map {
+        position: absolute;
+        left: 25%;
+        top: 0;
+        bottom: 0;
+        width: 75%;
+    }
+    .map-overlay {
+        position: absolute;
+        width: 25%;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        background-color: #efefef;
+        max-height: 100%;
+        overflow: hidden;
+    }
+
+    .map-overlay fieldset {
+        display: none;
+        background: #ddd;
+        border: none;
+        padding: 10px;
+        margin: 0;
+    }
+
+    .map-overlay input {
+        display: block;
+        border: none;
+        width: 100%;
+        border-radius: 3px;
+        padding: 10px;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .map-overlay .listing {
+        overflow: auto;
+        max-height: 100%;
+    }
+
+    .map-overlay .listing > * {
+        display: block;
+        padding: 5px 10px;
+        margin: 0;
+    }
+
+    .map-overlay .listing a {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        color: #404;
+        text-decoration: none;
+    }
+
+    .map-overlay .listing a:last-child {
+        border: none;
+    }
+
+    .map-overlay .listing a:hover {
+        background: #f0f0f0;
+    }
+    .filter-btn {
+        display: block;
+        margin-bottom: 15px;
+        background: #fff;
+        cursor: pointer;
+        text-align: center;
+        padding: 10px;
+    }
+    #btn1, #btn2 {
+    display: none;
+    }
+</style>
+
+<div id="map"></div>
+
+<div class="map-overlay">
+    <label for="btn1" class="filter-btn">
+        Show me americans
+        <input type="checkbox" id="btn1" checked />
+    </label>
+    <label for="btn2" class="filter-btn">
+        Show me europeans
+        <input type="checkbox" id="btn2" checked />
+    </label>
+    
+</div>
+
+<script>
+	// TO MAKE THE MAP APPEAR YOU MUST
+	// ADD YOUR ACCESS TOKEN FROM
+	// https://account.mapbox.com
+	mapboxgl.accessToken = 'pk.eyJ1IjoibWFyY2Vsc2Fmb250dGVjdG9uaWNhIiwiYSI6ImNsZmNjNmN0bTAxMXE0MG56ZWVlaWxnOGEifQ.dSLvNNGEiQQAoW5wbT2mYA';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+        style: 'mapbox://styles/marcelsafonttectonica/clfcckzap000n01nqs20fd7st',
+        center: [-98, 38.88],
+        maxZoom: 5,
+        minZoom: 1,
+        zoom: 3
+    });
+
+    const data = [
+    { 'code': 'ROU', 'hdi': 0.811 },
+    { 'code': 'RUS', 'hdi': 0.816 },
+    { 'code': 'SRB', 'hdi': 0.787 },
+    { 'code': 'SVK', 'hdi': 0.855 },
+    { 'code': 'SVN', 'hdi': 0.896 },
+    { 'code': 'ESP', 'hdi': 0.891 },
+    { 'code': 'SWE', 'hdi': 0.933 },
+    { 'code': 'CHE', 'hdi': 0.944 },
+    { 'code': 'HRV', 'hdi': 0.831 },
+    { 'code': 'CZE', 'hdi': 0.888 },
+    { 'code': 'DNK', 'hdi': 0.929 },
+    { 'code': 'EST', 'hdi': 0.871 },
+    { 'code': 'FIN', 'hdi': 0.92 },
+    { 'code': 'FRA', 'hdi': 0.901 },
+    { 'code': 'DEU', 'hdi': 0.936 },
+    { 'code': 'GRC', 'hdi': 0.87 },
+    { 'code': 'ALB', 'hdi': 0.785 },
+    { 'code': 'AND', 'hdi': 0.858 },
+    { 'code': 'AUT', 'hdi': 0.908 },
+    { 'code': 'BLR', 'hdi': 0.808 },
+    { 'code': 'BEL', 'hdi': 0.916 },
+    { 'code': 'BIH', 'hdi': 0.768 },
+    { 'code': 'BGR', 'hdi': 0.813 },
+    { 'code': 'MKD', 'hdi': 0.757 },
+    { 'code': 'MLT', 'hdi': 0.878 },
+    { 'code': 'MDA', 'hdi': 0.7 },
+    { 'code': 'MNE', 'hdi': 0.814 },
+    { 'code': 'NLD', 'hdi': 0.931 },
+    { 'code': 'NOR', 'hdi': 0.953 },
+    { 'code': 'POL', 'hdi': 0.865 },
+    { 'code': 'PRT', 'hdi': 0.847 },
+    { 'code': 'HUN', 'hdi': 0.838 },
+    { 'code': 'ISL', 'hdi': 0.935 },
+    { 'code': 'IRL', 'hdi': 0.938 },
+    { 'code': 'ITA', 'hdi': 0.88 },
+    { 'code': 'LVA', 'hdi': 0.847 },
+    { 'code': 'LIE', 'hdi': 0.916 },
+    { 'code': 'LTU', 'hdi': 0.858 },
+    { 'code': 'LUX', 'hdi': 0.904 },
+    { 'code': 'UKR', 'hdi': 0.751 },
+    { 'code': 'GBR', 'hdi': 0.922 }
+    ];
+
+    map.on('load', () => {
+
+        map.addSource('countries', {
+            type: 'vector',
+            url: 'mapbox://mapbox.country-boundaries-v1'
+        });
+
+        const matchExpression = ['match', ['get', 'iso_3166_1_alpha_3']];
+
+        for (const row of data) {
+            // Convert the range of data values to a suitable color
+
+            var color = `rgb(0, 0, 0)`;
+            if(row['code'] == "RUS"){
+                const red = row['hdi'] * 255;
+                color = `rgb(${red}, 0, 0)`;
+            }else{
+                const green = row['hdi'] * 255;
+                color = `rgb(0, ${green}, 0)`;
+            }
+
+            
+            
+            matchExpression.push(row['code'], color);
+        }
+
+        matchExpression.push('rgba(0, 0, 0, 0)');
+
+        const WORLDVIEW = "US";
+        const worldview_filter = [ "all", [ "==", ["get", "disputed"], "false" ], [ "any", [ "==", "all", ["get", "worldview"] ], [ "in", WORLDVIEW, ["get", "worldview"] ] ] ];
+
+        map.addLayer(
+            {
+                'id': 'countries-join',
+                'type': 'fill',
+                'source': 'countries',
+                'source-layer': 'country_boundaries',
+                'paint': {
+                'fill-color': matchExpression
+                },
+                'filter': worldview_filter
+            },
+            'admin-1-boundary-bg'
+        );
+
+
+
+        map.addSource('test1', {
+            'type': 'vector',
+            'url': 'mapbox://marcelsafonttectonica.clibfca89212n2bnv1blgdsde-0eqsa'
+        });
+        map.addLayer({
+            'id': 'test1',
+            'source': 'test1',
+            "source-layer": "test1",
+            "type": "circle",
+            "paint": {
+              "circle-color": "#FFC0CB"
+            }
+        });
+
+        map.addSource('test2', {
+            'type': 'vector',
+            'url': 'mapbox://marcelsafonttectonica.clibfwfh601ar2cmz44jb43tm-4qhe0'
+        });
+        map.addLayer({
+            'id': 'test2',
+            'source': 'test2',
+            "source-layer": "test2",
+            "type": "circle",
+            "paint": {
+              "circle-color": "#FFC0CB"
+            }
+        });
+        
+    });
+
+    showHideLayer('btn1', 'test1');
+    showHideLayer('btn2', 'test2');
+
+    function showHideLayer(input, layer) {
+        // When the checkbox changes, update the visibility of the layer.
+        document.getElementById(input).addEventListener('change', (e) => {
+            map.setLayoutProperty(
+                layer,
+                'visibility',
+                e.target.checked ? 'visible' : 'none'
+            );
+        });                    
+    }
+
+
+    /*map.on('idle', () => {
+     document.querySelector('#btn1').addEventListener('click', function(){
+      map.setLayoutProperty(
+        'test1',
+        'visibility',
+        'none'
+        );
+     })
+    })*/
+</script>
+
+</body>
+</html>
